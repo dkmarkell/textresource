@@ -1,5 +1,9 @@
 # TextResource
 
+[![Build & Test](https://github.com/dkmarkell/textresource/actions/workflows/build.yml/badge.svg)](https://github.com/dkmarkell/textresource/actions/workflows/build.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Version](https://img.shields.io/badge/version-0.1.0--SNAPSHOT-blue)
+
 A small Android library for representing and resolving text at the right time and place — without scattering string resolution logic across your UI.
 
 ## Why?
