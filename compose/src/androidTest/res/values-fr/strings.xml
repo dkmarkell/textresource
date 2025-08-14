@@ -1,0 +1,4 @@
+<resources>
+    <string name="hello">Bonjour</string>
+    <string name="greeting_name">Bonjour %1$s</string>
+</resources>

@@ -1,0 +1,7 @@
+<resources>
+    <string name="hello_user">Hello %1$s</string>
+    <plurals name="apples_count">
+        <item quantity="one">%1$d apple</item>
+        <item quantity="other">%1$d apples</item>
+    </plurals>
+</resources>
