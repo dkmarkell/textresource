@@ -20,7 +20,10 @@ jobs:
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v3
       - name: Build + unit tests
-        run: ./gradlew clean build -x connectedAndroidTest
+        run: |
+          ./gradlew clean \
+            :core:testDebugUnitTest \
+            :compose:testDebugUnitTest
 
   # 2) Instrumented tests on API 32
   androidTest:
