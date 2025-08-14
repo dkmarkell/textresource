@@ -16,7 +16,10 @@ android {
 
     buildFeatures { buildConfig = false }
 
-    testOptions { unitTests.isIncludeAndroidResources = true }
+    testBuildType = "debug"
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
