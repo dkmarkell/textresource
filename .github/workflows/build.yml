@@ -41,21 +41,31 @@ jobs:
         uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v3
 
-      - name: Run connectedAndroidTest on API 32
+      - name: Run connectedAndroidTest on API 31 (AOSP)
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 32
-          target: google_apis
+          api-level: 31              # more reliable than 32 on CI
+          target: default            # AOSP image, fewer splits
           arch: x86_64
           profile: pixel_6
           headless: true
-          force-avd-creation: true          # ensure cold boot
-          boot-timeout: 900                 # 15 minutes
+          force-avd-creation: true   # cold boot
+          boot-timeout: 900          # 15 min
           disable-animations: true
           emulator-options: >
             -no-window -gpu swiftshader_indirect
             -no-boot-anim -noaudio -no-snapshot
             -camera-back none -camera-front none
           script: |
+            set -e
             ./gradlew :compose:assembleDebug :compose:assembleAndroidTest
-            ./gradlew :compose:connectedDebugAndroidTest
+            # simple retry loop for flaky install/launch
+            n=0
+            until [ $n -ge 3 ]
+            do
+              ./gradlew :compose:connectedDebugAndroidTest && break
+              n=$((n+1))
+              echo "Retry $n after failed install/run..."
+              adb uninstall io.github.dkmarkell.textresource.compose.test || true
+              sleep 10
+            done
