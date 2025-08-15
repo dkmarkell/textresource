@@ -26,42 +26,34 @@ jobs:
             :compose:testDebugUnitTest
 
   # 2) Instrumented tests on API 32
-  androidTest:
-    runs-on: ubuntu-latest
-    needs: unit
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v4
-      - uses: gradle/wrapper-validation-action@v2
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-      - name: Install Android SDK components
-        uses: android-actions/setup-android@v3
-      - uses: gradle/actions/setup-gradle@v3
+androidTest:
+  runs-on: ubuntu-latest
+  needs: unit
+  timeout-minutes: 45
+  steps:
+    - uses: actions/checkout@v4
+    - uses: gradle/wrapper-validation-action@v2
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: "17"
+    - name: Install Android SDK components
+      uses: android-actions/setup-android@v3
+    - uses: gradle/actions/setup-gradle@v3
+    - name: Run connectedAndroidTest on API 31 (AOSP)
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 31
+        target: default
+        arch: x86_64
+        profile: pixel_6
+        headless: true
+        force-avd-creation: true
+        boot-timeout: 900
+        disable-animations: true
+        emulator-options: >
+          -no-window -gpu swiftshader_indirect
+          -no-boot-anim -noaudio -no-snapshot
+          -camera-back none -camera-front none
+        script: ./gradlew :compose:assembleDebug :compose:assembleAndroidTest && ( ./gradlew :compose:connectedDebugAndroidTest || ( adb uninstall io.github.dkmarkell.textresource.compose.test || true; sleep 10; ./gradlew :compose:connectedDebugAndroidTest ) )
 
-      - name: Run connectedAndroidTest on API 31 (AOSP)
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 31
-          target: default
-          arch: x86_64
-          profile: pixel_6
-          headless: true
-          force-avd-creation: true
-          boot-timeout: 900
-          disable-animations: true
-          emulator-options: >
-            -no-window -gpu swiftshader_indirect
-            -no-boot-anim -noaudio -no-snapshot
-            -camera-back none -camera-front none
-          script: |
-            ./gradlew :compose:assembleDebug :compose:assembleAndroidTest
-            for attempt in 1 2 3; do
-              ./gradlew :compose:connectedDebugAndroidTest && exit 0
-              echo "Retry $attempt after failure…"
-              adb uninstall io.github.dkmarkell.textresource.compose.test || true
-              sleep 10
-            done
-            exit 1
