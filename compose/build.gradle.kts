@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     `maven-publish`
+    signing
 }
 
 android {
@@ -13,6 +14,12 @@ android {
     defaultConfig {
         minSdk = 21
         consumerProguardFiles("proguard-rules.pro") // create at compose/proguard-rules.pro
+    }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
     }
 
     buildFeatures { compose = true }
@@ -30,27 +37,60 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    publishing {
-        singleVariant("release") {
-            withSourcesJar()
-        }
-    }
 }
+
 kotlin {
     jvmToolchain(17)
     explicitApi()
 }
 
-publishing {
-    publications {
-        register<MavenPublication>("release") {
-            afterEvaluate { from(components["release"]) }
-            artifactId = "textresource-compose"
-            pom {
-                name.set("TextResource Compose")
-                description.set("Compose integration for TextResource.")
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from(components["release"])
+                groupId = project.findProperty("GROUP") as String
+                artifactId = "textresource-compose"
+                version = project.findProperty("VERSION_NAME") as String
+
+                artifact(tasks.register("javadocJar", Jar::class) {
+                    archiveClassifier.set("javadoc")
+                })
+
+                pom {
+                    name.set("TextResource Compose")
+                    description.set("Jetpack Compose integration for the TextResource library.")
+                    url.set("https://github.com/dkmarkell/textresource")
+                    licenses {
+                        license {
+                            name.set("MIT License")
+                            url.set("https://github.com/dkmarkell/textresource/blob/main/LICENSE")
+                            distribution.set("repo")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("dkmarkell")
+                            name.set("Derek Markell")
+                            url.set("https://github.com/dkmarkell")
+                        }
+                    }
+                    scm {
+                        url.set("https://github.com/dkmarkell/textresource")
+                        connection.set("scm:git:https://github.com/dkmarkell/textresource.git")
+                        developerConnection.set("scm:git:ssh://git@github.com/dkmarkell/textresource.git")
+                    }
+                }
             }
         }
+    }
+
+    signing {
+        useInMemoryPgpKeys(
+            System.getenv("SIGNING_KEY"),
+            System.getenv("SIGNING_KEY_PASSWORD").takeUnless { it.isNullOrBlank() }
+        )
+        sign(publishing.publications)
     }
 }
 

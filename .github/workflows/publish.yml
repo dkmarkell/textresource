@@ -1,0 +1,40 @@
+name: Publish to Maven Central (Release-only)
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Verify tag matches VERSION_NAME
+        run: |
+          TAG="${GITHUB_REF##*/}"        # e.g., v0.1.0
+          FILE_VER="$(grep '^VERSION_NAME=' gradle.properties | cut -d= -f2)"
+          if [ "v${FILE_VER}" != "${TAG}" ]; then
+            echo "Tag (${TAG}) does not match VERSION_NAME (${FILE_VER})"; exit 1
+          fi
+          if echo "${FILE_VER}" | grep -q -- "-SNAPSHOT"; then
+            echo "VERSION_NAME is a SNAPSHOT; releases must be final."; exit 1
+          fi
+
+      - name: Build
+        run: ./gradlew --no-daemon clean build
+
+      - name: Publish to Maven Central
+        env:
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+        run: ./gradlew --no-daemon publishAggregationToCentralPortal
