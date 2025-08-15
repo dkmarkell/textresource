@@ -19,6 +19,7 @@ android {
     publishing {
         singleVariant("release") {
             withSourcesJar()
+            withJavadocJar()
         }
     }
 
@@ -47,50 +48,58 @@ kotlin {
 afterEvaluate {
     publishing {
         publications {
-            create<MavenPublication>("release") {
-                from(components["release"])
-                groupId = project.findProperty("GROUP") as String
-                artifactId = "textresource-compose"
-                version = project.findProperty("VERSION_NAME") as String
+            val releasePub = (findByName("release") as? org.gradle.api.publish.maven.MavenPublication)
+                ?: create("release", org.gradle.api.publish.maven.MavenPublication::class.java) {
+                    from(components["release"])
+                }
 
-                artifact(tasks.register("javadocJar", Jar::class) {
-                    archiveClassifier.set("javadoc")
-                })
+            releasePub.groupId = (findProperty("GROUP") as String?) ?: project.group.toString()
+            releasePub.artifactId = "textresource-compose"
+            releasePub.version = (findProperty("VERSION_NAME") as String?) ?: project.version.toString()
 
-                pom {
-                    name.set("TextResource Compose")
-                    description.set("Jetpack Compose integration for the TextResource library.")
+            releasePub.pom {
+                name.set("TextResource Compose")
+                description.set(
+                    "Jetpack Compose extensions for TextResource: resolve strings in composition and remember definitions efficiently, pairing with the core module."
+                )
+                url.set("https://github.com/dkmarkell/textresource")
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://github.com/dkmarkell/textresource/blob/main/LICENSE")
+                        distribution.set("repo")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("dkmarkell")
+                        name.set("Derek Markell")
+                        url.set("https://github.com/dkmarkell")
+                    }
+                }
+                scm {
                     url.set("https://github.com/dkmarkell/textresource")
-                    licenses {
-                        license {
-                            name.set("MIT License")
-                            url.set("https://github.com/dkmarkell/textresource/blob/main/LICENSE")
-                            distribution.set("repo")
-                        }
-                    }
-                    developers {
-                        developer {
-                            id.set("dkmarkell")
-                            name.set("Derek Markell")
-                            url.set("https://github.com/dkmarkell")
-                        }
-                    }
-                    scm {
-                        url.set("https://github.com/dkmarkell/textresource")
-                        connection.set("scm:git:https://github.com/dkmarkell/textresource.git")
-                        developerConnection.set("scm:git:ssh://git@github.com/dkmarkell/textresource.git")
-                    }
+                    connection.set("scm:git:https://github.com/dkmarkell/textresource.git")
+                    developerConnection.set("scm:git:ssh://git@github.com/dkmarkell/textresource.git")
+                    tag.set("v${releasePub.version}")
                 }
             }
         }
     }
 
+    val isCi = (System.getenv("CI") == "true")
+    val key  = System.getenv("SIGNING_KEY")
+    val pass = System.getenv("SIGNING_KEY_PASSWORD").takeUnless { it.isNullOrBlank() }
+
     signing {
-        useInMemoryPgpKeys(
-            System.getenv("SIGNING_KEY"),
-            System.getenv("SIGNING_KEY_PASSWORD").takeUnless { it.isNullOrBlank() }
-        )
-        sign(publishing.publications)
+        isRequired = isCi
+        if (!key.isNullOrBlank()) {
+            useInMemoryPgpKeys(key, pass)
+            sign(publishing.publications)
+        }
+    }
+    tasks.withType(Sign::class.java).configureEach {
+        onlyIf { !System.getenv("SIGNING_KEY").isNullOrBlank() }
     }
 }
 
