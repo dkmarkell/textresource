@@ -65,19 +65,23 @@ android {
             }
         }
 
-        val isCi = (System.getenv("CI") == "true")
         val key  = System.getenv("SIGNING_KEY")
         val pass = System.getenv("SIGNING_KEY_PASSWORD").takeUnless { it.isNullOrBlank() }
+        val hasKey = !key.isNullOrBlank()
+        val isCi   = System.getenv("CI") == "true"
 
         signing {
-            isRequired = isCi
-            if (!key.isNullOrBlank()) {
+            isRequired = isCi && hasKey
+
+            if (hasKey) {
                 useInMemoryPgpKeys(key, pass)
-                sign(publishing.publications)
+                sign(publishing.publications)   // runs only when a key is present
             }
         }
+
+        // Skip sign tasks entirely when there's no key
         tasks.withType(Sign::class.java).configureEach {
-            onlyIf { !System.getenv("SIGNING_KEY").isNullOrBlank() }
+            onlyIf { hasKey }
         }
     }
 
