@@ -1,8 +1,10 @@
 # TextResource
 
-[![Build & Test](https://github.com/dkmarkell/textresource/actions/workflows/build.yml/badge.svg)](https://github.com/dkmarkell/textresource/actions/workflows/build.yml)
+[![Maven Central – core](https://img.shields.io/maven-central/v/io.github.dkmarkell/textresource-core?label=textresource-core)](https://central.sonatype.com/artifact/io.github.dkmarkell/textresource-core)
+[![Maven Central – compose](https://img.shields.io/maven-central/v/io.github.dkmarkell/textresource-compose?label=textresource-compose)](https://central.sonatype.com/artifact/io.github.dkmarkell/textresource-compose)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-0.1.0--SNAPSHOT-blue)
+![minSdk](https://img.shields.io/badge/minSdk-21-blue)
+![Kotlin](https://img.shields.io/badge/Kotlin-1.9.25-blue)
 
 A small Android library for representing and resolving text at the right time and place — without scattering string resolution logic across your UI.
 
