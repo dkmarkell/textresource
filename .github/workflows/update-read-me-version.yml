@@ -1,0 +1,34 @@
+name: Update README version
+on:
+  release:
+    types: [published]
+
+jobs:
+  bump-readme:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update version in README from release tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"  # v0.1.0 -> 0.1.0
+
+          # Replace placeholders like <version> or {version}
+          sed -i -E "s#(io.github\.dkmarkell:textresource-(core|compose)):(<version>|\\{version\\})#\\1:${VERSION}#g" README.md
+
+          # Replace any existing numeric versions in install lines
+          sed -i -E "s#(io.github\.dkmarkell:textresource-(core|compose):)[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.]+)?#\\1${VERSION}#g" README.md
+
+          # If you keep a static version badge (not the shields above), update it too:
+          sed -i -E "s|(img.shields.io/badge/version-)[^-]+(-blue)|\\1${VERSION}\\2|g" README.md
+
+      - name: Commit and push README
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "docs: update README version to ${VERSION}" || echo "No changes to commit"
+          git push
