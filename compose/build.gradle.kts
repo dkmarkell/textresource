@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     `maven-publish`
     signing
+    id("com.gradleup.nmcp")
 }
 
 android {
