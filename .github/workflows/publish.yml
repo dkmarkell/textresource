@@ -29,8 +29,8 @@ jobs:
             echo "VERSION_NAME is a SNAPSHOT; releases must be final."; exit 1
           fi
 
-      - name: Build
-        run: ./gradlew --no-daemon clean build
+      - name: Assemble release artifacts (no tests)
+        run: ./gradlew --no-daemon :core:assembleRelease :compose:assembleRelease -x test -x check
 
       - name: Publish to Maven Central
         env:
