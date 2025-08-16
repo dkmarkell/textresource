@@ -66,7 +66,7 @@ android {
         }
 
         val key  = System.getenv("SIGNING_KEY")
-        val pass = System.getenv("SIGNING_KEY_PASSWORD").takeUnless { it.isNullOrBlank() }
+        val pass = System.getenv("SIGNING_KEY_PASSWORD") ?: ""
         val hasKey = !key.isNullOrBlank()
         val isCi   = System.getenv("CI") == "true"
 
