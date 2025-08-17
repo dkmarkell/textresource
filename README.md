@@ -24,7 +24,6 @@ TextResource solves this by:
 Benefits:
 - Keep UI code clean and focused on layout.
 - Centralize localization, formatting, and pluralization.
-- Easier unit testing — no Android framework dependencies in tests.
 
 ## Installation
 
