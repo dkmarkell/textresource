@@ -210,10 +210,6 @@ fun rememberTextResource(key1: Any?, factory: () -> TextResource): TextResource
 fun rememberTextResource(vararg keys: Any?, factory: () -> TextResource): TextResource
 ```
 
-## License
-
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-
 ## FAQ
 
 **Q: Should I use the factory functions or the functional interface (SAM) initializer?**  
@@ -236,3 +232,7 @@ val x = TextResource { "Hello, Derek" }
 val y = TextResource { "Hello, Derek" }
 println(x == y) // false ❌ reference-based
 ```
+
+## License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
