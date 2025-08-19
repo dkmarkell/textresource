@@ -25,6 +25,49 @@ Benefits:
 - Keep UI code clean and focused on layout.
 - Centralize localization, formatting, and pluralization.
 
+2 common usecases **TextResource** solves
+
+### Example 1: Exposing data to build strings
+Without **TextResource**, you might pass raw data (like a name or count) up to the UI just so it can build a string:
+```kotlin
+// Without TextResource
+// ViewModel exposes raw fields
+val userName = "Derek"
+val messageCount = 3
+
+// UI has to know how to build the string
+textView.text = context.getString(R.string.greeting, userName, messageCount)
+```
+With **TextResource**, you can pass the ready-to-resolve object instead:
+```kotlin
+// With TextResource
+// ViewModel exposes the final representation
+val greeting = TextResource.simple(R.string.greeting, "Derek", 3)
+
+// UI just resolves it when needed
+textView.text = greeting.resolveString(context)
+```
+
+### Example 2: Holding a Context in a ViewModel
+A common anti-pattern is to hold a [Context] inside a ViewModel to build strings:
+```kotlin
+// Without TextResource
+class MyViewModel(private val context: Context) : ViewModel() {
+    val greeting = context.getString(R.string.greeting, userName)
+}
+```
+With **TextResource**, you just hold a `TextResource`:
+```kotlin
+// With TextResource
+class MyViewModel : ViewModel() {
+    val greeting = TextResource.simple(R.string.greeting, "Derek", 3)
+}
+
+// Resolved later in the UI layer
+textView.text = greeting.resolveString(context)
+```
+The UI (Activity/Fragment/Composable) provides the context at render time when resolving the string.
+
 ## Installation
 
 Add the dependencies to your `build.gradle`:
@@ -72,7 +115,7 @@ val welcome = rememberTextResource(key1 = username) {
 Text(welcome.resolveString())
 ```
 
-### In a ViewModel
+### ViewModel example
 ```kotlin
 class HomeViewModel : ViewModel() {
     private val _title = MutableStateFlow(TextResource.raw(""))
@@ -96,7 +139,7 @@ class HomeViewModel : ViewModel() {
 }
 ```
 
-### In Compose
+### Compose example
 ```kotlin
 @Composable
 fun HomeScreen(vm: HomeViewModel = viewModel()) {
@@ -170,3 +213,26 @@ fun rememberTextResource(vararg keys: Any?, factory: () -> TextResource): TextRe
 ## License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+## FAQ
+
+**Q: Should I use the factory functions or the functional interface (SAM) initializer?**  
+A: Use the factory functions (`raw`, `simple`, `plural`) in most cases. These return **value-based objects** that:
+- Compare equal when constructed with the same inputs (`==` works as expected).
+- Work well in collections (`List`, `Set`, `Map`).
+- Are easier to test and reason about.
+
+The SAM initializer (`TextResource { ... }`) creates an anonymous object. Each call produces a new instance, so:
+- Equality is by reference only (two identical SAMs are *not* equal).
+- Collections treat them as different objects, even if they resolve to the same text.
+- Use SAMs when you need dynamic/custom resolution logic.
+
+```kotlin
+val a = TextResource.simple(R.string.greeting, "Derek")
+val b = TextResource.simple(R.string.greeting, "Derek")
+println(a == b) // true ✅ value-based
+
+val x = TextResource { "Hello, Derek" }
+val y = TextResource { "Hello, Derek" }
+println(x == y) // false ❌ reference-based
+```
