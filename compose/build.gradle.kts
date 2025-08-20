@@ -10,11 +10,10 @@ android {
     namespace = "io.github.dkmarkell.textresource.compose"
     compileSdk = 36
 
-    defaultConfig { testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
-
     defaultConfig {
         minSdk = 21
-        consumerProguardFiles("proguard-rules.pro") // create at compose/proguard-rules.pro
+        consumerProguardFiles("proguard-rules.pro")
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     publishing {
@@ -23,8 +22,6 @@ android {
             withJavadocJar()
         }
     }
-
-    buildFeatures { compose = true }
 
     buildFeatures {
         compose = true
@@ -114,8 +111,8 @@ dependencies {
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.runtime)
     implementation(libs.compose.ui)
-    implementation(libs.androidx.runner)
 
+    androidTestImplementation(libs.androidx.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.core.ktx)
     androidTestImplementation(platform(libs.compose.bom))
