@@ -39,7 +39,7 @@ Check out the [Sample app](./sample) for a complete demo.
 
 In a clean architecture, your ViewModel (or presenter) should decide what text is displayed, but not actually need to hold a Context to do it. With Android’s resource system, resolving strings usually requires a Context — which is either unavailable or awkward to inject.
 
-TextResource solves this by:
+**TextResource** solves this by:
 
 - Deferring resolution — store the definition of a string (e.g., resource ID + arguments) until it’s actually displayed.
 - Keeping formatting and pluralization logic out of presentation components — no need for Composables or Views to assemble text from parts.
@@ -205,11 +205,16 @@ private fun HomeScreen(
 
 ## API Overview
 
-**Factories**
-- `TextResource.raw(value: String)`
-- `TextResource.simple(@StringRes resId: Int, vararg args: Any)`
-- `TextResource.plural(@PluralsRes resId: Int, quantity: Int, vararg args: Any)`
+### Constructing
+**Core**
+- **Factories (value-based)**
+    - `TextResource.raw(value: String)`
+    - `TextResource.simple(@StringRes resId: Int, vararg args: Any)`
+    - `TextResource.plural(@PluralsRes resId: Int, quantity: Int, vararg args: Any)`
+- **SAM initializer (functional interface)**
+    - `TextResource { context -> /* resolve to a String using context */ }`
 
+### Resolving
 **Core**
 ```kotlin
 fun TextResource.resolveString(context: Context): String
@@ -219,6 +224,11 @@ fun TextResource.resolveString(context: Context): String
 ```kotlin
 @Composable
 fun TextResource.resolveString(): String
+```
+
+### Helpers
+**Compose**
+```kotlin
 @Composable
 fun rememberTextResource(factory: () -> TextResource): TextResource
 @Composable
@@ -226,6 +236,10 @@ fun rememberTextResource(key1: Any?, factory: () -> TextResource): TextResource
 @Composable
 fun rememberTextResource(vararg keys: Any?, factory: () -> TextResource): TextResource
 ```
+
+### Equality semantics (important)
+- Factory-created instances compare by **value** (same inputs → `==` is `true`)
+- SAM-created instances compare by **reference** (each lambda is a new object)
 
 ## FAQ
 
