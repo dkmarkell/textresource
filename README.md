@@ -8,6 +8,33 @@
 
 A small Android library for representing and resolving text at the right time and place — without scattering string resolution logic across your UI.
 
+## Installation
+
+Add the dependencies to your `build.gradle`:
+```kotlin
+dependencies {
+    implementation("io.github.dkmarkell.textresource:core:<version>")
+    
+    // If you use Compose:
+    implementation("io.github.dkmarkell.textresource:compose:<version>")
+}
+```
+
+## Quick Start
+
+```kotlin
+// ViewModel
+val title = TextResource.simple(R.string.greeting, userName)
+
+// Compose
+Text(title.resolveString())
+
+// Views
+textView.text = title.resolveString(context)
+```
+
+Check out the [Sample app](./sample) for a complete demo.
+
 ## Why?
 
 In a clean architecture, your ViewModel (or presenter) should decide what text is displayed, but not actually need to hold a Context to do it. With Android’s resource system, resolving strings usually requires a Context — which is either unavailable or awkward to inject.
@@ -67,16 +94,6 @@ class MyViewModel : ViewModel() {
 textView.text = greeting.resolveString(context)
 ```
 The UI (Activity/Fragment/Composable) provides the context at render time when resolving the string.
-
-## Installation
-
-Add the dependencies to your `build.gradle`:
-```kotlin
-dependencies {
-    implementation("io.github.dkmarkell.textresource:core:<version>")
-    implementation("io.github.dkmarkell.textresource:compose:<version>")
-}
-```
 
 ## Usage
 
