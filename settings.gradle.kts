@@ -7,3 +7,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "TextResource"
 include(":core", ":compose", ":sample")
+include(":test")
