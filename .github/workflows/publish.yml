@@ -30,7 +30,7 @@ jobs:
           fi
 
       - name: Assemble release artifacts (no tests)
-        run: ./gradlew --no-daemon :core:assembleRelease :compose:assembleRelease -x test -x check
+        run: ./gradlew --no-daemon :core:assembleRelease :compose:assembleRelease :test:assembleRelease -x test -x check
 
       - name: Publish to Maven Central
         env:
