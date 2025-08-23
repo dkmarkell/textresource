@@ -14,10 +14,10 @@ A small Android library for representing and resolving text at the right time an
 Add the dependencies to your `build.gradle`:
 ```kotlin
 dependencies {
-    implementation("io.github.dkmarkell.textresource:core:<version>")
+    implementation("io.github.dkmarkell:textresource-core:<version>")
     
     // If you use Compose:
-    implementation("io.github.dkmarkell.textresource:compose:<version>")
+    implementation("io.github.dkmarkell:textresource-compose:<version>")
 }
 ```
 
@@ -26,7 +26,7 @@ dependencies {
 ```kotlin
 // build.gradle.kts (module where your tests run)
 dependencies {
-  testImplementation("io.github.dkmarkell.textresource:textresource-test:<version>")
+  testImplementation("io.github.dkmarkell:textresource-test:<version>")
   testImplementation("org.robolectric:robolectric:<version>")
 }
 
