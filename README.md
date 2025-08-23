@@ -35,6 +35,17 @@ android {
 }
 ```
 
+#### Robolectric SDK cap (e.g., targetSdk = 36)
+
+If your app targets a newer SDK than Robolectric supports, set the test SDK so unit tests run:
+
+**Per test class**
+```kotlin
+@RunWith(org.robolectric.RobolectricTestRunner::class)
+@org.robolectric.annotation.Config(sdk = [35])
+class MyTest { /* ... */ }
+```
+
 ## Quick Start
 
 ```kotlin
