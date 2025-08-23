@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # 1) JVM/unit tests (core + compose)
+  # 1) JVM/unit tests (core + compose + test)
   unit:
     runs-on: ubuntu-latest
     steps:
@@ -23,7 +23,8 @@ jobs:
         run: |
           ./gradlew clean \
             :core:testDebugUnitTest \
-            :compose:testDebugUnitTest
+            :compose:testDebugUnitTest \
+            :test:testDebugUnitTest
 
   # 2) Instrumented tests on API 32
   androidTest:

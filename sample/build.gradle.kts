@@ -17,6 +17,8 @@ android {
 
     buildFeatures { compose = true }
 
+    testOptions { unitTests.isIncludeAndroidResources = true }
+
     buildFeatures {
         compose = true
     }
@@ -42,4 +44,9 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)    // editor preview tooling in debug only
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.lifecycle.runtime.compose)
+
+    testImplementation(project(":test"))
+    testImplementation(libs.robolectric)
+    testImplementation(libs.junit4)
+    testImplementation(kotlin("test"))
 }

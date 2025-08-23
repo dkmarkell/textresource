@@ -1,0 +1,6 @@
+<resources>
+    <plurals name="apples_count" translatable="false">
+        <item quantity="one">%d apple</item>
+        <item quantity="other">%d apples</item>
+    </plurals>
+</resources>

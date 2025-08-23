@@ -2,6 +2,7 @@
 
 [![Maven Central – core](https://img.shields.io/maven-central/v/io.github.dkmarkell/textresource-core?label=textresource-core)](https://central.sonatype.com/artifact/io.github.dkmarkell/textresource-core)
 [![Maven Central – compose](https://img.shields.io/maven-central/v/io.github.dkmarkell/textresource-compose?label=textresource-compose)](https://central.sonatype.com/artifact/io.github.dkmarkell/textresource-compose)
+[![Maven Central – test](https://img.shields.io/maven-central/v/io.github.dkmarkell/textresource-test?label=textresource-test)](https://central.sonatype.com/artifact/io.github.dkmarkell.textresource/textresource-test)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![minSdk](https://img.shields.io/badge/minSdk-21-blue)
 ![Kotlin](https://img.shields.io/badge/Kotlin-1.9.25-blue)
@@ -18,6 +19,31 @@ dependencies {
     // If you use Compose:
     implementation("io.github.dkmarkell.textresource:compose:<version>")
 }
+```
+
+### Testing (Robolectric)
+
+```kotlin
+// build.gradle.kts (module where your tests run)
+dependencies {
+  testImplementation("io.github.dkmarkell.textresource:textresource-test:<version>")
+  testImplementation("org.robolectric:robolectric:<version>")
+}
+
+android {
+  testOptions { unitTests.isIncludeAndroidResources = true }
+}
+```
+
+#### Robolectric SDK cap (e.g., targetSdk = 36)
+
+If your app targets a newer SDK than Robolectric supports, set the test SDK so unit tests run:
+
+**Per test class**
+```kotlin
+@RunWith(org.robolectric.RobolectricTestRunner::class)
+@org.robolectric.annotation.Config(sdk = [35])
+class MyTest { /* ... */ }
 ```
 
 ## Quick Start
@@ -39,7 +65,7 @@ Check out the [Sample app](./sample) for a complete demo.
 
 In a clean architecture, your ViewModel (or presenter) should decide what text is displayed, but not actually need to hold a Context to do it. With Android’s resource system, resolving strings usually requires a Context — which is either unavailable or awkward to inject.
 
-TextResource solves this by:
+**TextResource** solves this by:
 
 - Deferring resolution — store the definition of a string (e.g., resource ID + arguments) until it’s actually displayed.
 - Keeping formatting and pluralization logic out of presentation components — no need for Composables or Views to assemble text from parts.
@@ -203,13 +229,37 @@ private fun HomeScreen(
 }
 ```
 
+## Testing with TextResourceTest
+
+`textresource-test` provides a tiny helper that resolves `TextResource` in **local unit tests** (Robolectric), so your specs don’t need to wire a `Context` each time.
+
+### Examples
+```kotlin
+// Basic
+val tr = TextResource.simple(R.string.greeting, "Derek")
+assertEquals("Hello, Derek", TextResourceTest.resolve(tr))
+
+// Force locale
+val tr = TextResource.simple(R.string.greeting, "Derek")
+assertEquals("Bonjour, Derek", TextResourceTest.resolve(tr, Locale.FRANCE))
+
+// Plurals
+val apples = TextResource.plural(R.plurals.apples_count, 2, 2)
+assertEquals("2 apples", TextResourceTest.resolve(apples))
+```
+
 ## API Overview
 
-**Factories**
-- `TextResource.raw(value: String)`
-- `TextResource.simple(@StringRes resId: Int, vararg args: Any)`
-- `TextResource.plural(@PluralsRes resId: Int, quantity: Int, vararg args: Any)`
+### Constructing
+**Core**
+- **Factories (value-based)**
+    - `TextResource.raw(value: String)`
+    - `TextResource.simple(@StringRes resId: Int, vararg args: Any)`
+    - `TextResource.plural(@PluralsRes resId: Int, quantity: Int, vararg args: Any)`
+- **SAM initializer (functional interface)**
+    - `TextResource { context -> /* resolve to a String using context */ }`
 
+### Resolving
 **Core**
 ```kotlin
 fun TextResource.resolveString(context: Context): String
@@ -219,6 +269,11 @@ fun TextResource.resolveString(context: Context): String
 ```kotlin
 @Composable
 fun TextResource.resolveString(): String
+```
+
+### Helpers
+**Compose**
+```kotlin
 @Composable
 fun rememberTextResource(factory: () -> TextResource): TextResource
 @Composable
@@ -226,6 +281,19 @@ fun rememberTextResource(key1: Any?, factory: () -> TextResource): TextResource
 @Composable
 fun rememberTextResource(vararg keys: Any?, factory: () -> TextResource): TextResource
 ```
+
+### Testing
+**Test**
+```kotlin
+object TextResourceTest {
+  @JvmStatic
+  fun resolve(tr: TextResource, locale: Locale = Locale.US): String
+}
+```
+
+### Equality semantics (important)
+- Factory-created instances compare by **value** (same inputs → `==` is `true`)
+- SAM-created instances compare by **reference** (each lambda is a new object)
 
 ## FAQ
 
@@ -243,11 +311,11 @@ The SAM initializer (`TextResource { ... }`) creates an anonymous object. Each c
 ```kotlin
 val a = TextResource.simple(R.string.greeting, "Derek")
 val b = TextResource.simple(R.string.greeting, "Derek")
-println(a == b) // true ✅ value-based
+println(a == b) // true -> value-based
 
 val x = TextResource { "Hello, Derek" }
 val y = TextResource { "Hello, Derek" }
-println(x == y) // false ❌ reference-based
+println(x == y) // false -> reference-based
 ```
 
 ## License
