@@ -20,6 +20,7 @@ nmcpAggregation {
 dependencies {
     nmcpAggregation(project(":core"))
     nmcpAggregation(project(":compose"))
+    nmcpAggregation(project(":test"))
 }
 
 
